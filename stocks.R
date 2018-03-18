@@ -4,10 +4,11 @@
 # create an array of ticker symbols and call getStockCor function to generate
 # a correlation matrix
 
-library(corrplot);
-library(stringr);
-library(httr);
-
+library(corrplot)
+library(stringr)
+library(httr)
+library(jsonlite)
+library(stats)
 
 getStockCor <- function(ticker, period=30, mode=1)
 {
