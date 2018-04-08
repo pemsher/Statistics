@@ -10,10 +10,10 @@ library(httr)
 library(jsonlite)
 library(stats)
 
-getStockCor <- function(ticker, period=30, mode=1)
+getStockCor <- function(ticker, period=90, mode=1)
 {
  
-  stockPortfolio <- getStock(ticker)
+  stockPortfolio <- getStock(ticker,period)
   
   #print("printing stockPortfolio")
   #print(stockPortfolio)
@@ -22,7 +22,7 @@ getStockCor <- function(ticker, period=30, mode=1)
   if(mode==1)
   {
     corstockPortfolio <- cor(stockPortfolioc[1:period,2:ncol(stockPortfolioc)],use="complete.obs")
-    corrplot(corstockPortfolio,method="number", type="upper")
+    corrplot(corstockPortfolio,method="number", type="lower")
    }
   else
   {
@@ -34,19 +34,19 @@ getStockCor <- function(ticker, period=30, mode=1)
   
   
 }
-getStock <- function(ticker){
+getStock <- function(ticker,period){
 
-  DAYS <- 90
+  DAYS <- 150
   TODAY <- Sys.Date()
   LOOK_BACK <- Sys.Date() - DAYS
   STOCK_END_POINT <- "https://sandbox.tradier.com/v1/markets/history?symbol=";
   #print(LOOK_BACK)
   stockUrl <- paste(STOCK_END_POINT,str_trim(ticker[1],side="both"),"&start=",str_trim(LOOK_BACK,side="both"),"&end=",str_trim(TODAY,side="both"),sep="")
   stockData <- fromJSON(content(GET(url=stockUrl,add_headers(Authorization="Bearer i6jVdhOxuVDHAxn88AOajVuvZ3YE",'Content-Type'="application/json")),"text"),flatten=TRUE)
-  #print(stockUrl)
-  #print(stockData)
+  print(stockUrl)
+  print(stockData)
   #stockClosePrice <- vector();
-  stockClosePrice <- closePrice(stockData,30,TRUE) 
+  stockClosePrice <- closePrice(stockData,period,TRUE) 
   colnames(stockClosePrice)[2] <- ticker[1]
   if (length(ticker) > 1)
   {
@@ -54,7 +54,9 @@ getStock <- function(ticker){
     {
      stockUrl <- paste("https://sandbox.tradier.com/v1/markets/history?symbol=",str_trim(ticker[i],side="both"),"&start=",str_trim(LOOK_BACK,side="both"),"&end=",str_trim(TODAY,side="both"),sep="")
      stockData <- fromJSON(content(GET(url=stockUrl,add_headers(Authorization="Bearer i6jVdhOxuVDHAxn88AOajVuvZ3YE",'Content-Type'="application/json")),"text"),flatten=TRUE)
-     stockClosePrice <- cbind(stockClosePrice,closePrice(stockData,30,FALSE))
+     print(stockUrl)
+     print(stockData)
+     stockClosePrice <- cbind(stockClosePrice,closePrice(stockData,period,FALSE))
      colnames(stockClosePrice)[i+1] <- ticker[i]
     }
   }
@@ -62,7 +64,7 @@ getStock <- function(ticker){
 }
 
 #
-closePrice <- function (S,period=30,date=TRUE){
+closePrice <- function (S,period=90,date=TRUE){
   
   #Need to add 1 as we discard one entry when we calculate change
   #This way we will still have period worth of observations
