@@ -29,6 +29,8 @@ getOptionChain <- function(symbols,expiration,seriesVolume=1000,saleVolume=500){
 
   NASDAQ_30 <- c("FRSH","OPTT","WLB","JIVE","EXAC","NVCR","SLAB","KLXI","NRCIA","AKTX","FNLC","SCON","EXAS","IBKC","FARM","ATEC","FARO","TSLA","CVCY","CVCO","FNJN","CMRX","NRCIB","FEYE","POPE","LTEA","SPHS","FRTA","AGLE","NVCN")
 
+  NASDAQ_100 <- c("AAL","AAPL","ADBE","ADI","ADP","ADSK","AKAM","ALGN","ALXN","AMAT","AMGN","AMZN","ATVI","AVGO","BIDU","BIIB","BMRN","CA","CELG","CERN","CHKP","CHTR","CTRP","CTAS","CSCO","CTXS","CMCSA","COST","CSX","CTSH","DISCA","DISCK","UNCH","DISH","DLTR","EA","EBAY","ESRX","EXPE","FAST","FB","FISV","FOX","FOXA","GILD","GOOG","GOOGL","HAS","HSIC","HOLX","ILMN","INCY","INTC","INTU","ISRG","JBHT","JD","KLAC","KHC","LBTYK","LILA","LBTYA","QRTEA","MELI","MAR","MAT","MDLZ","MNST","MSFT","MU","MXIM","MYL","NCLH","NFLX","NTES","NVDA","PAYX","BKNG","PYPL","QCOM","REGN","ROST","SHPG","SIRI","SWKS","SBUX","SYMC","TSCO","TXN","TMUS","ULTA","VIAB","VOD","VRTX","WBA","WDC","XRAY","IDXX","LILAK","LRCX","MCHP","ORLY","PCAR","STX","TSLA","VRSK","WYNN","XLNX")
+  
   if (symbols[1] == "dow")
   {
     symbols <- DOW_30
@@ -37,6 +39,11 @@ getOptionChain <- function(symbols,expiration,seriesVolume=1000,saleVolume=500){
   if (symbols[1] == "nasdaq")
   {
     symbols <- NASDAQ_30
+  }
+  
+  if (symbols[1] == "nasdaq100")
+  {
+    symbols <- NASDAQ_100
   }
   #print(LOOK_BACK)
   for(symIdx in 1:length(symbols))
@@ -47,14 +54,22 @@ getOptionChain <- function(symbols,expiration,seriesVolume=1000,saleVolume=500){
     #print(optionsChainData)
     #print(length(optionsChainData$options$option))
     option_len <- length(optionsChainData$options$option[,"symbol"])
+    #print(paste("len ", length(optionsChainData$options$option[,"symbol"])))
     for (i in 1:option_len)
     {
+      if (option_len < 1)
+      {
+        print("**************************************************************")
+        print(paste(symbols[symIdx],"<",expiration,">","[NO OPTIONS SERIES]"))
+        print("**************************************************************")
+        break
+      }
      # print(i)
     #  print(paste(optionsChainData$options$option[i,"symbol"]," ",optionsChainData$options$option[i,"volume"]," ",optionsChainData$options$option[i,"open_interest"]))
      # print(paste(optionsChainData$options$option[i,"volume"]," ",optionsChainData$options$option[i,"open_interest"]))
       if(optionsChainData$options$option[i,"volume"] > seriesVolume & (optionsChainData$options$option[i,"volume"] > optionsChainData$options$option[i,"open_interest"]))
       {
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print("=================================================================================")
         print(paste(optionsChainData$options$option[i,"root_symbol"],optionsChainData$options$option[i,"strike"],"[",optionsChainData$options$option[i,"option_type"],"]",optionsChainData$options$option[i,"expiration_date"],optionsChainData$options$option[i,"symbol"]," ",optionsChainData$options$option[i,"volume"]," ",optionsChainData$options$option[i,"open_interest"]))
         print("--------------------------------------------------------------------------------")
         print(paste("Searching...",optionsChainData$options$option[i,"symbol"]," Time of Sales..."))
