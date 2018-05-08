@@ -22,7 +22,8 @@ library(stats)
 
 getMarketData <- function(url)
 {
-  print(url)
+  # enable only for debug
+  #print(url)
 	marketData <- tryCatch(
         	{
     	   		fromJSON(content(GET(url=url,add_headers(Authorization="Bearer i6jVdhOxuVDHAxn88AOajVuvZ3YE",'Content-Type'="application/json")),"text"),flatten=FALSE)
@@ -31,7 +32,7 @@ getMarketData <- function(url)
     		{
     		 print(e);
     		 print("Errored...retrying after 60 seconds")
-	         Sys.sleep(2)
+	         Sys.sleep(60)
 	         return (fromJSON(content(GET(url=url,add_headers(Authorization="Bearer i6jVdhOxuVDHAxn88AOajVuvZ3YE",'Content-Type'="application/json")),"text"),flatten=FALSE))
 			}
     		)
