@@ -63,6 +63,18 @@ getURL <- function(symbol, END_POINT_ASK, expiration )
   URL
 }
 
+getCloseOrLast <- function(data)
+{
+	if (is.null(data$quotes$quote$close))
+	{
+		data$quotes$quote$last
+	}
+	else
+	{
+		data$quotes$quote$close
+	}
+}
+
 getOptionChain <- function(symbols,expiration,seriesVolume=1000,saleVolume=500){
 
   FILE_NAME = paste(str_trim("C:/pemsher/Statistics/scan_",side="both"),str_trim(Sys.Date(),side="both"),"_",str_trim(format(Sys.time(), "%H-%M-%OS3"),side="both"),sep="")
@@ -142,7 +154,7 @@ getOptionChain <- function(symbols,expiration,seriesVolume=1000,saleVolume=500){
         break
       }
 
-      if(optionsChainData$options$option[i,"volume"] > seriesVolume & (optionsChainData$options$option[i,"volume"] > (optionsChainData$options$option[i,"open_interest"] * 2)))
+      if(optionsChainData$options$option[i,"volume"] > seriesVolume & (optionsChainData$options$option[i,"volume"] > (optionsChainData$options$option[i,"open_interest"] * 3)))
       {
         #Prepare option quote url to get time of sales
         optionQuoteURL <- getURL(optionsChainData$options$option[i,"symbol"],"TIMESALES_API_END_POINT","")
@@ -170,8 +182,14 @@ getOptionChain <- function(symbols,expiration,seriesVolume=1000,saleVolume=500){
             MONEYNESS <- ""
 
             SYMBOL_DETAIL <- paste(underlyingData$quotes$quote$symbol, "(", underlyingData$quotes$quote$description, ")")
+            #debug
+            #print(SYMBOL_DETAIL)
 
-            STRIKE_VS_SPOT <- round(optionsChainData$options$option[i,"strike"] - underlyingData$quotes$quote$close, digits = 2)
+            #print(optionsChainData$options$option[i,"strike"])
+
+            #print(underlyingData)
+
+            STRIKE_VS_SPOT <- round(optionsChainData$options$option[i,"strike"] - getCloseOrLast(underlyingData), digits = 2)
 
             STRIKE_PRICE_B_A <- paste(round(optionsQuoteData$series$data[idx,"close"],digits=4), "|", round(optionsChainData$options$option[idx,"bid"],digits=4), "x",round(optionsChainData$options$option[idx,"ask"],digits=4));
 
@@ -198,7 +216,7 @@ getOptionChain <- function(symbols,expiration,seriesVolume=1000,saleVolume=500){
             	}
             }
 
-            SUMMARY [[summary_index]] <- paste(str_pad(SYMBOL_DETAIL,25,"right"), "|", str_pad(underlyingData$quotes$quote$close,7,"right"),"|",str_pad(optionsChainData$options$option[i,"strike"],6,"right"),"|",str_pad(MONEYNESS,10,"right"),str_pad(toupper(optionsChainData$options$option[i,"option_type"]),4,"right"),"|",optionsChainData$options$option[i,"expiration_date"],"|",str_pad(optionsChainData$options$option[i,"volume"],9,"right"),"|",str_pad(optionsChainData$options$option[i,"open_interest"],8,"right"),"|",str_pad(optionsQuoteData$series$data[idx,"volume"],6,"right"),"(SV)", STRIKE_PRICE_B_A )
+            SUMMARY [[summary_index]] <- paste(str_pad(SYMBOL_DETAIL,25,"right"), "|", str_pad(getCloseOrLast(underlyingData),7,"right"),"|",str_pad(optionsChainData$options$option[i,"strike"],6,"right"),"|",str_pad(MONEYNESS,10,"right"),str_pad(toupper(optionsChainData$options$option[i,"option_type"]),4,"right"),"|",optionsChainData$options$option[i,"expiration_date"],"|",str_pad(optionsChainData$options$option[i,"volume"],9,"right"),"|",str_pad(optionsChainData$options$option[i,"open_interest"],8,"right"),"|",str_pad(optionsQuoteData$series$data[idx,"volume"],6,"right"),"(SV)", STRIKE_PRICE_B_A )
 
             if(printed == FALSE)
             {
